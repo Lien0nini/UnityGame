@@ -1,6 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class QuestionSet
+{
+    public VideoClip questionClip;
+    public VideoClip successClip;
+    public VideoClip failureClip;
+}
 
 public class VideoFlowController : MonoBehaviour
 {
@@ -9,69 +18,63 @@ public class VideoFlowController : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private RawImage videoScreen;
 
-    [Header("Clips")]
-    [SerializeField] private VideoClip introClip;    // first video (auto-plays)
-    [SerializeField] private VideoClip successClip;  // second video
-    [SerializeField] private VideoClip failureClip;  // third video
-
     [Header("UI")]
-    [SerializeField] private GameObject choicePanel; // contains the two buttons
+    [SerializeField] private GameObject choicePanel;
     [SerializeField] private Button successButton;
     [SerializeField] private Button failureButton;
 
-    private enum State { Idle, Intro, WaitingForChoice, PlayingOutcome }
-    private State state = State.Idle;
+    [Header("Video Sequence")]
+    [SerializeField] private List<QuestionSet> questions = new List<QuestionSet>();
+
+    private int currentIndex = 0;
+
+    private enum Phase { Question, OutcomeSuccess, OutcomeFailure }
+    private Phase phase = Phase.Question;
 
     private void Awake()
     {
-        // Safety checks
-        if (!player) player = GetComponent<VideoPlayer>();
-        if (!audioSource) audioSource = GetComponent<AudioSource>();
+        // Wire buttons
+        if (successButton) successButton.onClick.AddListener(OnSuccess);
+        if (failureButton) failureButton.onClick.AddListener(OnFailure);
 
-        // Ensure audio is routed
+        // Video events
+        player.loopPointReached += OnVideoFinished;
+
+        // Route audio through AudioSource
         player.audioOutputMode = VideoAudioOutputMode.AudioSource;
         player.EnableAudioTrack(0, true);
         player.SetTargetAudioSource(0, audioSource);
-
-        // Button wiring
-        if (successButton) successButton.onClick.AddListener(PlaySuccess);
-        if (failureButton) failureButton.onClick.AddListener(PlayFailure);
-
-        ShowChoices(false);
-
-        // Subscribe to end-of-clip event
-        player.loopPointReached += OnVideoFinished;
     }
 
     private void Start()
     {
-        PlayClip(introClip, State.Intro);
+        if (questions.Count == 0 || questions[0].questionClip == null)
+        {
+            Debug.LogWarning("No questions configured.");
+            return;
+        }
+        PlayQuestion(currentIndex);
     }
 
     private void OnDestroy()
     {
         player.loopPointReached -= OnVideoFinished;
-        if (successButton) successButton.onClick.RemoveListener(PlaySuccess);
-        if (failureButton) failureButton.onClick.RemoveListener(PlayFailure);
+        if (successButton) successButton.onClick.RemoveListener(OnSuccess);
+        if (failureButton) failureButton.onClick.RemoveListener(OnFailure);
     }
 
-    private void PlayClip(VideoClip clip, State nextState)
+    // ---------- Flow helpers ----------
+
+    private void PlayClip(VideoClip clip)
     {
-        if (clip == null)
-        {
-            Debug.LogWarning("Missing VideoClip reference.");
-            return;
-        }
+        if (!clip) { Debug.LogWarning("Missing VideoClip."); return; }
+        choicePanel.SetActive(false);
 
-        ShowChoices(false);
-        state = nextState;
-
-        player.source = VideoSource.VideoClip;
+        // Prepare then play (prevents black frame)
         player.clip = clip;
-
-        // Prepare to avoid a black frame; then play when ready
-        player.Prepare();
+        player.prepareCompleted -= OnPrepared;           // safety: avoid multi-subscribe
         player.prepareCompleted += OnPrepared;
+        player.Prepare();
     }
 
     private void OnPrepared(VideoPlayer vp)
@@ -80,36 +83,58 @@ public class VideoFlowController : MonoBehaviour
         vp.Play();
     }
 
+    private void PlayQuestion(int index)
+    {
+        phase = Phase.Question;
+        PlayClip(questions[index].questionClip);
+    }
+
+    private void PlaySuccessOutcome()
+    {
+        phase = Phase.OutcomeSuccess;
+        PlayClip(questions[currentIndex].successClip);
+    }
+
+    private void PlayFailureOutcome()
+    {
+        phase = Phase.OutcomeFailure;
+        PlayClip(questions[currentIndex].failureClip);
+    }
+
+    // ---------- UI callbacks ----------
+
+    private void OnSuccess()  => PlaySuccessOutcome();
+    private void OnFailure()  => PlayFailureOutcome();
+
+    // ---------- Video end logic ----------
+
     private void OnVideoFinished(VideoPlayer vp)
     {
-        if (state == State.Intro)
+        switch (phase)
         {
-            // After intro finishes, reveal choice UI
-            state = State.WaitingForChoice;
-            ShowChoices(true);
+            case Phase.Question:
+                // Question just ended → show choices
+                choicePanel.SetActive(true);
+                break;
+
+            case Phase.OutcomeSuccess:
+                // Success outcome ended → advance to NEXT question (if any)
+                currentIndex++;
+                if (currentIndex < questions.Count && questions[currentIndex].questionClip)
+                {
+                    PlayQuestion(currentIndex);
+                }
+                else
+                {
+                    choicePanel.SetActive(false);
+                    Debug.Log("✅ Sequence complete!");
+                }
+                break;
+
+            case Phase.OutcomeFailure:
+                // Failure outcome ended → REPLAY the SAME question
+                PlayQuestion(currentIndex);
+                break;
         }
-        else if (state == State.PlayingOutcome)
-        {
-            // End of success/failure video; you can loop back to choices or end flow.
-            ShowChoices(true);
-            state = State.WaitingForChoice;
-        }
-    }
-
-    private void PlaySuccess()
-    {
-        PlayClip(successClip, State.PlayingOutcome);
-    }
-
-    private void PlayFailure()
-    {
-        PlayClip(failureClip, State.PlayingOutcome);
-    }
-
-    private void ShowChoices(bool show)
-    {
-        if (choicePanel) choicePanel.SetActive(show);
-        // Optionally pause the player while choices are up
-        if (show && player.isPlaying) player.Pause();
     }
 }

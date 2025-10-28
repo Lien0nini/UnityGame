@@ -677,8 +677,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -275, y: 0}
-  m_SizeDelta: {x: 206, y: 456}
+  m_AnchoredPosition: {x: -214, y: 0}
+  m_SizeDelta: {x: 206, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1090645217
 MonoBehaviour:
@@ -693,7 +693,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1043,7 +1043,7 @@ GameObject:
   - component: {fileID: 2135298845}
   - component: {fileID: 2135298844}
   - component: {fileID: 2135298843}
-  - component: {fileID: 2135298842}
+  - component: {fileID: 2135298846}
   m_Layer: 0
   m_Name: VideoController
   m_TagString: Untagged
@@ -1051,27 +1051,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2135298842
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2135298841}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3256140d1f5442768281f0bc8973e13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 2135298844}
-  audioSource: {fileID: 2135298843}
-  videoScreen: {fileID: 1134005673}
-  introClip: {fileID: 32900000, guid: 4a262e1de48bc461c884c2464c560136, type: 3}
-  successClip: {fileID: 32900000, guid: 54582e1550fa8440a9cbb46f96649911, type: 3}
-  failureClip: {fileID: 32900000, guid: 6fc72472470ce4f39b4a6f5d0003f0ee, type: 3}
-  choicePanel: {fileID: 1090645215}
-  successButton: {fileID: 1917589148}
-  failureButton: {fileID: 1354991862}
 --- !u!82 &2135298843
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1219,6 +1198,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2135298846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2135298841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3256140d1f5442768281f0bc8973e13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 2135298844}
+  audioSource: {fileID: 2135298843}
+  videoScreen: {fileID: 1134005673}
+  choicePanel: {fileID: 1090645215}
+  successButton: {fileID: 1917589148}
+  failureButton: {fileID: 1354991862}
+  questions:
+  - questionClip: {fileID: 32900000, guid: 4a262e1de48bc461c884c2464c560136, type: 3}
+    successClip: {fileID: 32900000, guid: 54582e1550fa8440a9cbb46f96649911, type: 3}
+    failureClip: {fileID: 32900000, guid: 6fc72472470ce4f39b4a6f5d0003f0ee, type: 3}
+  - questionClip: {fileID: 32900000, guid: 857c086848ed94ee3825f9d8875aed39, type: 3}
+    successClip: {fileID: 32900000, guid: 7dc99af7e414946bbbe5e5366aa00c0c, type: 3}
+    failureClip: {fileID: 32900000, guid: 489b5daf9429c4b8492fb0892dc55e56, type: 3}
+  - questionClip: {fileID: 32900000, guid: de1d6d2269d5f4051aacd47c66b8d13e, type: 3}
+    successClip: {fileID: 32900000, guid: 2a51e0b7e934a49959753d8a187cd0d2, type: 3}
+    failureClip: {fileID: 32900000, guid: 218e084138d134ce2a8c397e9d373b8c, type: 3}
+  - questionClip: {fileID: 32900000, guid: f7bcbf3dd48b34b4ca5bd46f15ed7f01, type: 3}
+    successClip: {fileID: 32900000, guid: c2120f01129ed474dab884a38b90ceee, type: 3}
+    failureClip: {fileID: 32900000, guid: 5202e07971d39417a818f0ca5a72a2d0, type: 3}
+  - questionClip: {fileID: 32900000, guid: 7f69c25009735451f8a956e81bf6ccd4, type: 3}
+    successClip: {fileID: 32900000, guid: edaf6f6ec4f924c1bb2608496a162c47, type: 3}
+    failureClip: {fileID: 32900000, guid: beb213fe163284cefa1d2687cb18e649, type: 3}
+  - questionClip: {fileID: 32900000, guid: bbbf8aff84ec74237949948c58dad663, type: 3}
+    successClip: {fileID: 32900000, guid: 448ec532367bc429cbcae2df77ba1335, type: 3}
+    failureClip: {fileID: 32900000, guid: 47639ed15618b4260842bf3bbec1e20a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
